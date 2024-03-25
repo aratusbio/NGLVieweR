@@ -9,13 +9,15 @@
 #' @param position a numeric of length 3, or a matrix with three columns
 #' @param color a color
 #' @param radius the radius
-addSphere <- function(x, position, color = c(1, 0, 0), radius = 0.25) {
+addSphere <- function(x, position, color = c(1, 0, 0), radius = 0.25, 
+                      name = NULL) {
   UseMethod("addSphere", x)
 }
 
 #' @noRd
 #' @export
-addSphere.NGLVieweR <- function(x, position, color = c(1, 0, 0), radius = 0.25) {
+addSphere.NGLVieweR <- function(x, position, color = c(1, 0, 0), radius = 0.25,
+                                name = NULL) {
   stopifnot(is(x, "NGLVieweR"))
   buffer <- .sphere_buffer(position, color, radius)
   
@@ -28,7 +30,7 @@ addSphere.NGLVieweR <- function(x, position, color = c(1, 0, 0), radius = 0.25) 
 #' @noRd
 #' @export
 addSphere.NGLVieweR_proxy <- function(x, position, color = c(1, 0, 0),
-                                      radius = 0.25) {
+                                      radius = 0.25, name = NULL) {
   buffer <- .sphere_buffer(position, color, radius)
   message <- list(id = x$id, buffer = buffer)
   x$session$sendCustomMessage("NGLVieweR:addSphere", message)
@@ -64,4 +66,14 @@ addSphere.NGLVieweR_proxy <- function(x, position, color = c(1, 0, 0),
     position = as.numeric(t(position)),
     color = as.numeric(t(color)),
     radius = radius)
+}
+
+#' @noRd
+#' @export
+removeSphere <- function(x, name) {
+  stopifnot(is(x, "NGLVieweR_proxy"))
+  stopifnot(is.character(name), length(name) == 1L)
+  message <- list(id = x$id, buffer_name = name)
+  x$session$sendCustomMessage("NGLVieweR:removeSphere", message)
+  return(x)
 }

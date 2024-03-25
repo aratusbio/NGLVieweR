@@ -48,3 +48,18 @@ function getNGLStructure(id){
   }
 }
 
+//Make buffer available to R after rendering
+function getNGLStructure(id){
+
+  // Get the HTMLWidgets object
+  var htmlWidgetsObj = HTMLWidgets.find("#" + id);
+
+  // Get structure object after initial rendering
+  if(htmlWidgetsObj !== undefined){
+    var NGLObj = htmlWidgetsObj.getBuffer();
+     return(NGLObj);
+  } else {
+    return(undefined);
+  }
+}
+

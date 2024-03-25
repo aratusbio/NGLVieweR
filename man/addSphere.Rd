@@ -4,7 +4,7 @@
 \alias{addSphere}
 \title{Add a sphere(s) to an NGLView object}
 \usage{
-addSphere(x, position, color = c(1, 0, 0), radius = 0.25)
+addSphere(x, position, color = c(1, 0, 0), radius = 0.25, name = NULL)
 }
 \arguments{
 \item{x}{an \code{NGLVieweR} objects, or its proxy}
