@@ -194,6 +194,9 @@ NGLVieweR <- function(data, format = NULL, width = NULL, height = NULL, elementI
   x$addRepresentation <- list()
   x$addRepresentation$type <- list()
   x$addRepresentation$values <- list()
+  
+  x$spheres <- list(position = numeric(), color = numeric(), radius = numeric())
+  
   x$setQuality <- "medium"
   x$setRock <- FALSE
   x$toggleRock <- FALSE

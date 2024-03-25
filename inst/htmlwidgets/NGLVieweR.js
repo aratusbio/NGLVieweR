@@ -25,7 +25,7 @@ HTMLWidgets.widget({
       stage.handleResize();
       }, false );
       }
-   
+
       //Load timer for rendering
       //console.time("load-to-render");
 
@@ -42,7 +42,7 @@ HTMLWidgets.widget({
         structure = stage.loadFile(new Blob([opts.data], {type: 'text/plain'}), {
          ext:opts.file_ext});
       }
-      
+
       //Load representation inputs
       var representation = opts.addRepresentation;
       var arrType = representation.type;
@@ -50,64 +50,76 @@ HTMLWidgets.widget({
       //Convert array values
       arrHandler(arrValues, "color");
 
-      structure.then(function(o){
-      //Apply to all values objects
-      arrValues.forEach((value, index) => {
-         let type = arrType[index];
-         o.addRepresentation(type, value)
-       });
-      
-      o.autoView();
-      
-      //Set Scale
-      o.setScale(opts.setScale)
-  
-      //Set Rotation
-      if(Object.keys(opts.setRotation).length > 0) {
-      o.setRotation([opts.setRotation.x,opts.setRotation.y,opts.setRotation.z])
-      }
-      
-      //Set position
-      if(Object.keys(opts.setPosition).length > 0) {
-      o.setPosition([opts.setPosition.x,opts.setPosition.y,opts.setPosition.z])
-      }
-      
-      //Set zoomMove
-      var zoomMoveOpts = opts.zoomMove
-      if(typeof(zoomMoveOpts.zoom) !== 'undefined'){
-      var center = o.getCenter(zoomMoveOpts.center)
-      var zoom = o.getZoom(zoomMoveOpts.zoom) + zoomMoveOpts.z_offSet;
+      structure.then(function(o) {
+        //Apply to all values objects
+        arrValues.forEach((value, index) => {
+          let type = arrType[index];
+          o.addRepresentation(type, value)
+        });
 
-      stage.animationControls.zoomMove(center, zoom, zoomMoveOpts.duration);
-      }
-      
-     //Send AA sequence to Shiny
-     //var aa = o.structure.getSequence()
-     //Shiny.onInputChange(`${el.id}_sequence`, aa);
-     if (HTMLWidgets.shinyMode) {
-     var sequence = [];
-     var resno = [];
-     var chainname = [];
-     o.structure.eachResidue( rp => {
-     var code = rp.getResname1() // The single-letter code, use `rp.resname` for 3-letter
-     if (code !== 'X') {
-       sequence.push(code);
-       resno.push(rp.resno);
-       chainname.push(rp.chainname);
-       }
-     })
-      
-     //Write PDB  
-      var writer = new NGL.PdbWriter(o.structure)
-      var PDBdata = writer.getData()
-      var PDBblob = writer.getBlob()
+        var spheres = opts.spheres
+        console.log("length of sphere buffer: " + spheres.position.length);
 
-     Shiny.onInputChange(`${el.id}_PDB`, PDBdata)  
-     Shiny.onInputChange(`${el.id}_sequence`, sequence)
-     Shiny.onInputChange(`${el.id}_resno`, resno)
-     Shiny.onInputChange(`${el.id}_chainname`, chainname)
-     }
-     });
+        if (spheres.position.length > 0) {
+          // https://nglviewer.org/ngl/api/classes/bufferrepresentation.html
+          var sphereBuffer = new NGL.SphereBuffer({
+            position: spheres.position,
+            color: spheres.color,
+            radius: spheres.radius
+          });
+          o.addBufferRepresentation(sphereBuffer, { opacity: spheres.opacity });
+        }
+
+        o.autoView();
+
+        //Set Scale
+        o.setScale(opts.setScale)
+
+        //Set Rotation
+        if (Object.keys(opts.setRotation).length > 0) {
+          o.setRotation([opts.setRotation.x,opts.setRotation.y,opts.setRotation.z])
+        }
+
+        //Set position
+        if (Object.keys(opts.setPosition).length > 0) {
+          o.setPosition([opts.setPosition.x,opts.setPosition.y,opts.setPosition.z])
+        }
+
+        //Set zoomMove
+        var zoomMoveOpts = opts.zoomMove
+        if (typeof(zoomMoveOpts.zoom) !== 'undefined') {
+          var center = o.getCenter(zoomMoveOpts.center)
+          var zoom = o.getZoom(zoomMoveOpts.zoom) + zoomMoveOpts.z_offSet;
+          stage.animationControls.zoomMove(center, zoom, zoomMoveOpts.duration);
+        }
+
+      //Send AA sequence to Shiny
+      //var aa = o.structure.getSequence()
+      //Shiny.onInputChange(`${el.id}_sequence`, aa);
+      if (HTMLWidgets.shinyMode) {
+        var sequence = [];
+        var resno = [];
+        var chainname = [];
+        o.structure.eachResidue( rp => {
+          var code = rp.getResname1() // The single-letter code, use `rp.resname` for 3-letter
+          if (code !== 'X') {
+            sequence.push(code);
+            resno.push(rp.resno);
+            chainname.push(rp.chainname);
+          }
+        })
+
+        // Write PDB
+        var writer = new NGL.PdbWriter(o.structure)
+        var PDBdata = writer.getData()
+        var PDBblob = writer.getBlob()
+
+        Shiny.onInputChange(`${el.id}_PDB`, PDBdata)
+        Shiny.onInputChange(`${el.id}_sequence`, sequence)
+        Shiny.onInputChange(`${el.id}_resno`, resno)
+        Shiny.onInputChange(`${el.id}_chainname`, chainname)
+      }
+      });
 
      //<---------------------------// Shiny inputs // ---------------------------------->
      if (HTMLWidgets.shinyMode) {
@@ -123,20 +135,20 @@ HTMLWidgets.widget({
         }
       });
 
-      
+
       stage.signals.clicked.add(function(pickingProxy){
         if(pickingProxy) {
-          
+
       //Get AA selection details
         Shiny.onInputChange(`${el.id}_selection`, pickingProxy.getLabel());
-        
+
       //Get list of surrounding atoms
       if(pickingProxy.atom){
         structure.then(function(o){
-          
+
           var proximity = 3;
           var proxlevel = "residue";
-          
+
           if(typeof(opts.selectionParameters) !== 'undefined'){
           var proximity = opts.selectionParameters["proximity"];
           var proxlevel = opts.selectionParameters["level"];
@@ -148,14 +160,14 @@ HTMLWidgets.widget({
           if(proxlevel == "residue"){
           var selection = new NGL.Selection(resiName);
           } else {
-          var selection = new NGL.Selection(atomName);  
+          var selection = new NGL.Selection(atomName);
           }
-          
+
           var atomSet = o.structure.getAtomSetWithinSelection(selection, proximity);
           var atomSet2 = o.structure.getAtomSetWithinGroup( atomSet );
-         
-        Shiny.onInputChange(`${el.id}_selAround`, atomSet2.toSeleString());  
-        
+
+        Shiny.onInputChange(`${el.id}_selAround`, atomSet2.toSeleString());
+
         })
       }
         }
@@ -301,10 +313,10 @@ Shiny.addCustomMessageHandler('NGLVieweR:removeSelection', function(message){
 Shiny.addCustomMessageHandler('NGLVieweR:addSelection', function(message){
 
   var structure = getNGLStructure(message.id);
-  
+
       var param = message.param;
       var color = param['color'];
-      
+
       //Convert color values
       if(typeof color === 'object' && color !== null){
       param['color'] = colorMaker(param['color']);
@@ -317,6 +329,24 @@ Shiny.addCustomMessageHandler('NGLVieweR:addSelection', function(message){
   o.addRepresentation(message.type, param);
 
   });
+ }
+});
+
+Shiny.addCustomMessageHandler('NGLVieweR:addSphere', function(message) {
+
+  var structure = getNGLStructure(message.id);
+  var buffer = message.buffer;
+  
+  if (typeof(structure) !== "undefined" && buffer.position.length > 0) {
+    console.log("length of buffer: " + buffer.position.length);
+    structure.then(function(o) {
+      var sphereBuffer = new NGL.SphereBuffer({
+        position: buffer.position,
+        color: buffer.color,
+        radius: buffer.radius
+      });
+      o.addBufferRepresentation(sphereBuffer, { opacity: 1 });
+    });
  }
 });
 
@@ -361,10 +391,10 @@ Shiny.onInputChange(`${message.id}_rendering`, false);
 Shiny.addCustomMessageHandler('NGLVieweR:updateRepresentation', function(message){
 
     var stage = getNGLStage(message.id);
-    
+
     var param = message.param;
     var color = param['color'];
-      
+
       //Convert color values
       if(typeof color === 'object' && color !== null){
       param['color'] = colorMaker(param['color']);
