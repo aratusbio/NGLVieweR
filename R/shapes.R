@@ -31,10 +31,29 @@ addSphere.NGLVieweR <- function(x, position, color = c(1, 0, 0), radius = 0.25,
 #' @export
 addSphere.NGLVieweR_proxy <- function(x, position, color = c(1, 0, 0),
                                       radius = 0.25, name = NULL) {
+  if (is.null(name)) {
+    name <- basename(tempfile("sphereBuffer_"))
+    warning("You have not given this a name, generating a random one: ", name)
+  }
+  stopifnot(is.character(name), length(name) == 1L)
   buffer <- .sphere_buffer(position, color, radius)
-  message <- list(id = x$id, buffer = buffer)
+  message("addSphere for: ", x$id)
+  message <- list(id = x$id, buffer = buffer, name = name)
   x$session$sendCustomMessage("NGLVieweR:addSphere", message)
   return(x)
+}
+
+#' @noRd
+#' @export
+removeSphere <- function(x, name) {
+  message("removeSphere simply calls udpateVisibility(x, name, FALSE)")
+  stopifnot(is(x, "NGLVieweR_proxy"))
+  stopifnot(is.character(name), length(name) == 1L)
+  updateVisibility(x, name, FALSE)
+  # message("removeSphere for: ", x$id)
+  # message <- list(id = x$id, name = name)
+  # x$session$sendCustomMessage("NGLVieweR:removeSphere", message)
+  # return(x)
 }
 
 .sphere_buffer <- function(position, color, radius) {
@@ -66,14 +85,4 @@ addSphere.NGLVieweR_proxy <- function(x, position, color = c(1, 0, 0),
     position = as.numeric(t(position)),
     color = as.numeric(t(color)),
     radius = radius)
-}
-
-#' @noRd
-#' @export
-removeSphere <- function(x, name) {
-  stopifnot(is(x, "NGLVieweR_proxy"))
-  stopifnot(is.character(name), length(name) == 1L)
-  message <- list(id = x$id, buffer_name = name)
-  x$session$sendCustomMessage("NGLVieweR:removeSphere", message)
-  return(x)
 }

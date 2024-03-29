@@ -8,7 +8,6 @@ HTMLWidgets.widget({
 
       var stage = new NGL.Stage(el);
       var structure = null;
-      var buffer = {};
 
     return {
       renderValue: function(opts) {
@@ -68,7 +67,8 @@ HTMLWidgets.widget({
             color: spheres.color,
             radius: spheres.radius
           });
-          o.addBufferRepresentation(sphereBuffer, { opacity: spheres.opacity });
+          o.addBufferRepresentation(
+            sphereBuffer, { opacity: spheres.opacity });
         }
 
         o.autoView();
@@ -209,9 +209,6 @@ HTMLWidgets.widget({
         return structure;
       },
       
-      getBuffer: function() {
-        return buffer;
-      }
     };
   }
 });
@@ -339,7 +336,6 @@ Shiny.addCustomMessageHandler('NGLVieweR:addSelection', function(message){
 Shiny.addCustomMessageHandler('NGLVieweR:addSphere', function(message) {
 
   var structure = getNGLStructure(message.id);
-  var gbuffer = getBuffer(message.id);
   var buffer = message.buffer;
   
   if (typeof(structure) !== "undefined" && buffer.position.length > 0) {
@@ -350,27 +346,10 @@ Shiny.addCustomMessageHandler('NGLVieweR:addSphere', function(message) {
         color: buffer.color,
         radius: buffer.radius
       });
-      gbuffer[message.buffer_name] = sphereBuffer;
-      o.addBufferRepresentation(sphereBuffer, { opacity: 1 });
+      o.addBufferRepresentation(
+        sphereBuffer, 
+        { opacity: message.opacity, name: message.name });
     });
-  }
-});
-
-Shiny.addCustomMessageHandler('NGLVieweR:removeSphere', function(message) {
-
-  var structure = getNGLStructure(message.id);
-  var gbuffer = getBuffer(message.id);
-  
-  if (typeof(structure) !== "undefined") {
-    console.log("removing buffer: " + message.buffer_name);
-    if (message.buffer_name in gbuffer) {
-      console.log("found buffer");
-      var sphereBuffer = gbuffer[buffer_name];
-      sphereBuffer.dispose();
-      delete gbuffer[buffer_name];
-    } else {
-      console.log("sphere buffer doesn't exist: ", message.buffer_name);
-    }
   }
 });
 

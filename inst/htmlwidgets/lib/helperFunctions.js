@@ -49,7 +49,7 @@ function getNGLStructure(id){
 }
 
 //Make buffer available to R after rendering
-function getNGLStructure(id){
+function getNGLBuffer(id){
 
   // Get the HTMLWidgets object
   var htmlWidgetsObj = HTMLWidgets.find("#" + id);
