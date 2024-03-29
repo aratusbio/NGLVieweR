@@ -58,8 +58,6 @@ HTMLWidgets.widget({
         });
 
         var spheres = opts.spheres
-        console.log("length of sphere buffer: " + spheres.position.length);
-
         if (spheres.position.length > 0) {
           // https://nglviewer.org/ngl/api/classes/bufferrepresentation.html
           var sphereBuffer = new NGL.SphereBuffer({
@@ -339,7 +337,6 @@ Shiny.addCustomMessageHandler('NGLVieweR:addSphere', function(message) {
   var buffer = message.buffer;
   
   if (typeof(structure) !== "undefined" && buffer.position.length > 0) {
-    console.log("length of buffer: " + buffer.position.length);
     structure.then(function(o) {
       var sphereBuffer = new NGL.SphereBuffer({
         position: buffer.position,
