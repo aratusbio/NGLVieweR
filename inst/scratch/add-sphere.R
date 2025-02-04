@@ -86,3 +86,22 @@ nv <- NGLVieweR(fn$structure) |>
     position = pos.mat,
     color = c(1, 0, 0),
     radius = 0.25)
+
+# Add a selection over disjoin regions to simulate highlighting AA positions
+# across the protein. We'll highlight positions
+aapos <- c(13 ,204, 226)
+hstart <- aapos - 2
+hend <- aapos + 2
+aa.select <- paste(sprintf("%d-%d", hstart, hend), collapse = " or ")
+
+nv2 <- nv |> 
+  addRepresentation(
+    "cartoon",
+    param = list(
+      name = "region",
+      sele = aa.select,
+      opacity = 1,
+      # colorValue = "#517FE8",
+      colorValue = "#B77EB8",
+      # colorValue = "#00FF00",
+      colorScheme = "uniform"))
